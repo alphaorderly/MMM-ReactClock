@@ -2,6 +2,9 @@
 
 A MagicMirror² module that renders a clock (and optional world clocks) UI using React 18 + TypeScript bundled by Vite. The MagicMirror frontend loads only the pre‑built bundle (`dist/index.js` + `dist/index.css`). When `config.dev === true` the module performs a lightweight polling check and reloads the page if the bundle signature changes.
 
+<img width="485" height="381" alt="image" src="https://github.com/user-attachments/assets/d7244287-6eb6-4c4d-851e-f1619a9cc0eb" />
+
+
 ### Key Points
 
 - Clean React UI for current time (extensible to multiple / world clocks)
