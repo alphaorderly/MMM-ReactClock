@@ -1,0 +1,10 @@
+@import url("https://cdn.rawgit.com/moonspam/NanumSquare/master/nanumsquare.css");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom module-specific styling (avoid global leakage) */
+.mmm-reactclock-root {
+    font-family: "NanumSquare", sans-serif;
+}
