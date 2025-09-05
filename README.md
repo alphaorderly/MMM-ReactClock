@@ -1,5 +1,3 @@
-yarn build # 프로덕션 번들 생성
-
 ## MMM-ReactClock
 
 A MagicMirror² module that renders a clock (and optional world clocks) UI using React 18 + TypeScript bundled by Vite. The MagicMirror frontend loads only the pre‑built bundle (`dist/index.js` + `dist/index.css`). When `config.dev === true` the module performs a lightweight polling check and reloads the page if the bundle signature changes.
@@ -59,6 +57,69 @@ yarn build
 ```
 
 Guideline: Keep `dev` = false in production to avoid unnecessary polling.
+
+---
+
+| Key              | Required | Type             | Default            | Description                                                           |
+| ---------------- | -------- | ---------------- | ------------------ | --------------------------------------------------------------------- |
+| `primary`        | yes      | string (IANA TZ) | `America/New_York` | Primary timezone; updates every second.                               |
+| `others`         | no       | string[]         | `[]`               | Additional timezones; each updates every minute.                      |
+| `dev`            | no       | boolean          | `false`            | Enable polling auto‑reload of the bundle for development.             |
+| `updateInterval` | no       | number (ms)      | `60000`            | Poll interval when `dev === true`. Lower for faster reload detection. |
+
+You may add extra custom keys; they will be serialized and accessible via the config helpers, though not strongly typed unless you extend the interface.
+
+### Minimal Example
+
+```js
+{
+  module: 'MMM-ReactClock',
+  position: 'top_right',
+  config: { primary: 'UTC' }
+}
+```
+
+### Multi‑Timezone Example
+
+```js
+{
+  module: 'MMM-ReactClock',
+  position: 'top_right',
+  config: {
+    primary: 'Asia/Seoul',
+    others: ['Europe/London', 'America/Los_Angeles']
+  }
+}
+```
+
+### Dev Iteration Example
+
+```js
+{
+  module: 'MMM-ReactClock',
+  position: 'top_right',
+  config: {
+    dev: true,
+    updateInterval: 5000,
+    primary: 'Europe/Berlin',
+    others: ['Asia/Tokyo', 'Australia/Sydney']
+  }
+}
+```
+
+### Timezone Notes
+
+Use valid IANA timezone names (`Europe/Paris`, `America/Chicago`, `UTC`). Invalid names may cause Day.js to fallback or display incorrect offsets.
+
+### Access in React
+
+```ts
+import { ensureConfig } from "./config";
+const cfg = ensureConfig();
+// cfg?.primary, cfg?.others, cfg?.dev, cfg?.updateInterval
+```
+
+`ensureConfig()` caches the parsed JSON from the root element's `data-config` attribute.
 
 ---
 
