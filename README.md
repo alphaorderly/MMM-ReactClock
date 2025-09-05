@@ -1,240 +1,103 @@
-# mmm-reactclock
+yarn build # 프로덕션 번들 생성
 
-A MagicMirror² module whose UI is rendered by a React 18 + TypeScript application bundled with Vite. The module loads the pre-built bundle (no separate dev server required at runtime). In dev watch mode it polls the built file and auto‑reloads when it changes.
+## MMM-ReactClock
 
----
+A MagicMirror² module that renders a clock (and optional world clocks) UI using React 18 + TypeScript bundled by Vite. The MagicMirror frontend loads only the pre‑built bundle (`dist/index.js` + `dist/index.css`). When `config.dev === true` the module performs a lightweight polling check and reloads the page if the bundle signature changes.
 
-## Manual Rename (e.g. mmm-reactclock → MMM-ReactClock)
+### Key Points
 
-If you want to base a new module on this one:
-1. Rename directory: `mmm-reactclock` → `MMM-ReactClock`.
-2. Rename file: `mmm-reactclock.js` → `MMM-ReactClock.js`.
-3. Inside that file change: `Module.register("mmm-reactclock", {` → `Module.register("MMM-ReactClock", {`.
-4. In `package.json` update:
-  - `name`: `mmm-reactclock` → `mmm-reactclock`
-  - `main`: `mmm-reactclock.js` → `MMM-ReactClock.js`
-5. Update README heading / examples.
-6. Update `config/config.js` to use the new module name.
-7. Search all files for `mmm-reactclock` and replace with your new project name (e.g. `mmm-reactclock`). This includes CSS class names, dataset attributes, and any code or documentation references. This ensures consistent naming and avoids conflicts.
-
-Notes:
-- Stopping MagicMirror is usually not required; the UI will reload on next cycle, but if issues occur just restart.
-- Reinstall (`yarn install`) is unnecessary unless you also change dependencies.
-- Rebuild is unnecessary while using the watch build (`yarn dev`). For a fresh production bundle you can still run `yarn build` (optional).
+- Clean React UI for current time (extensible to multiple / world clocks)
+- Ship a single production bundle (no dev server required on the mirror)
+- Optional dev auto‑reload (poll + reload) while you iterate
 
 ---
 
-## Features
+## Install (Production Use via Release)
 
-- React 18 + TypeScript + Vite 5
-- Tailwind CSS (see `src/style.css`)
-- Single compiled entry: `dist/index.js` (+ `dist/index.css`)
-- Lightweight polling auto‑reload while `config.dev = true`
-- Clear separation: MagicMirror shell injects a root div + script only
+1. Download the latest ZIP from the GitHub Releases page.
+2. Unzip and rename the extracted folder to `MMM-ReactClock` (case sensitive) if it isn’t already.
+3. Place that folder under `MagicMirror/modules/`.
+4. Done. For production usage you normally do NOT need `yarn install` (the release bundle already includes the compiled `dist/`).
 
-## Requirements
+IMPORTANT: Release assets contain only the minimal production bundle (e.g. `dist/`, core wrapper file). They are NOT intended for source-level development. If you want to modify React/TypeScript source, clone the repository instead (see Development below). The `src/` directory is not included in the stripped minimal release package.
 
-- MagicMirror²
-- Node.js 18+ (for Vite 5)
+---
 
-## Installation
+## Development (Full Source)
 
-Repository: https://github.com/alphaorderly/Magic-Mirror-v2-React-module-template
+If you plan to change or extend the module UI/logic:
 
-The repository root IS the module root (no extra nested folder). You have three common options to install:
-
-Option A – Clone directly with desired module name (recommended):
 ```bash
 cd MagicMirror/modules
-git clone https://github.com/alphaorderly/Magic-Mirror-v2-React-module-template.git mmm-reactclock
-cd mmm-reactclock
+git clone <repo-url> MMM-ReactClock   # or clone elsewhere then move
+cd MMM-ReactClock
 yarn install
+yarn dev          # watch build -> outputs to dist/
 ```
 
-Option B – Clone with original repo name then optionally rename:
-```bash
-cd MagicMirror/modules
-git clone https://github.com/alphaorderly/Magic-Mirror-v2-React-module-template.git
-cd Magic-Mirror-v2-React-module-template
-# (optional) mv Magic-Mirror-v2-React-module-template mmm-reactclock
-yarn install
-```
+Open MagicMirror with module config `dev: true` for auto‑reload, or keep MagicMirror running and just let the bundle poller reload the window on each change.
 
-Option C – Develop on separate computer and transfer:
-```bash
-# On development computer
-git clone https://github.com/alphaorderly/Magic-Mirror-v2-React-module-template.git mmm-reactclock
-cd mmm-reactclock
-yarn install
-yarn test:dev    # Use standalone testing during development (see Standalone Testing section)
-yarn build       # Build production files when ready
-
-# Transfer entire folder to MagicMirror computer
-# On MagicMirror computer
-mv mmm-reactclock /path/to/MagicMirror/modules/
-# No need to run yarn install if only using built files
-```
-
-Custom name? Just replace `mmm-reactclock` above with your target (ensure it still begins with `MMM-` and update `Module.register(...)` + `config.js`).
-
-## Configuration (config/config.js)
-
-```js
-{
-  module: 'mmm-reactclock',
-  position: 'top_right',
-  config: {
-    dev: false,               // true during development (enables polling reload)
-    updateInterval: 60 * 1000 // ms between bundle signature checks in dev
-  }
-}
-```
-
-## Development Workflow
-
-Watch build (iterative development):
-```bash
-yarn dev    # runs: vite build --watch (outputs to dist/)
-```
-MagicMirror loads `dist/index.js`. The module polls the file every `updateInterval` ms and reloads the window when the signature changes.
-
-### Standalone Testing (without MagicMirror) {#standalone-testing}
-
-Test your module independently in a browser without installing it in MagicMirror:
-
-```bash
-yarn test:dev    # runs: vite --config vite.config.dev.js (opens browser at localhost:3000)
-```
-
-This launches a development server with:
-- Hot module replacement for instant feedback
-- MagicMirror-like styling simulation
-- Mock config data injection for testing config utilities
-- Independent testing environment
-- No interference with existing `yarn dev` or `yarn build` workflows
-
-The test environment includes a mock config object in `index.html` that simulates MagicMirror's config injection:
-```javascript
-const testConfig = {
-    dev: true,
-    updateInterval: 30000,
-    testMode: true,
-    customMessage: "Hello from config!"
-};
-```
-
-You can modify this object to test different config scenarios. The config is automatically injected into the React component via `data-config` attribute, allowing you to test your config utilities (`getConfig()`, `ensureConfig()`, etc.) in isolation.
-
-Additional test commands:
-```bash
-yarn test:build    # Build standalone test version
-yarn test:preview  # Preview built test version
-```
-
-Type checking:
-```bash
-yarn typecheck
-```
-
-Lint & format:
-```bash
-yarn lint
-yarn format
-```
-
-## Build for Production
+Production build when finished:
 
 ```bash
 yarn build
 ```
 
-Outputs placed in `dist/`:
-- `dist/index.js`
-- `dist/index.css`
+---
 
-They are automatically injected (see `mmm-reactclock.js`).
+## MagicMirror Config Example (config/config.js)
+
+```js
+{
+  module: 'MMM-ReactClock',
+  position: 'top_right',
+  config: {
+    dev: false,          // set true only while actively developing
+    updateInterval: 60000 // ms; polling interval when dev === true
+  }
+}
+```
+
+Guideline: Keep `dev` = false in production to avoid unnecessary polling.
+
+---
 
 ## How Dev Auto‑Reload Works
 
-When `config.dev === true`:
-1. A timer runs every `config.updateInterval` ms.
-2. It fetches `dist/index.js` with a cache‑busting query string.
-3. Creates a simple signature (file length + number of certain keywords).
-4. If signature differs from the previous one → `location.reload()`.
+When `config.dev` is true:
 
-Lower `updateInterval` (e.g. `5000`) for faster feedback.
+1. A timer runs every `updateInterval` ms.
+2. It fetches `dist/index.js` with a cache‑busting query param.
+3. It computes a simple signature (e.g. file length + token count).
+4. If the signature changed → `location.reload()`.
 
-## Code Overview
+Lower the interval (e.g. 5000) for faster feedback while coding.
 
-| Path | Purpose |
-|------|---------|
-| `mmm-reactclock.js` | MagicMirror module wrapper & polling logic |
-| `src/main.tsx` | React root mounting code |
-| `src/App.tsx` | Example React component |
-| `src/style.css` | Tailwind + module-scoped classes |
-| `dist/` | Build output (generated) |
+---
 
-## Accessing Module Config in React
+## Project Structure
 
-The MagicMirror module injects its `config` object into the root `<div>` via `data-config` (JSON string). A helper file `src/config.ts` exposes typed utilities:
+- `MMM-ReactClock.js` – MagicMirror module wrapper & polling logic
+- `dist/` – Compiled output consumed by MagicMirror
+- `src/` – (Only present when cloning full source) React + TypeScript code
 
-Exports (preferred names):
-- `ModuleConfig` (interface)
-- `getConfigRoot()` – first root element (`HTMLElement | null`)
-- `getConfig()` – parse current instance config (`ModuleConfig | null`)
-- `ensureConfig()` – cached version of `getConfig()` (returns same object on subsequent calls)
-- `getAllConfigs()` – for multiple module instances on the same page
+The release package may omit `src/` to stay lightweight.
 
-### Single Instance Example (`App.tsx`)
-```ts
-import { ensureConfig } from './config';
+---
 
-const cfg = ensureConfig() || {};
-// Example usage
-const isDev = !!cfg.dev;
+## Commands (when developing from source)
+
+```bash
+yarn dev     # continuous watch build
+yarn build   # production bundle
+yarn typecheck
+yarn lint
 ```
 
-### Direct (non‑cached) Access
-```ts
-import { getConfig } from './config';
-const cfg = getConfig(); // parses each call
-```
-
-### Multiple Instances
-```ts
-import { getAllConfigs } from './config';
-getAllConfigs().forEach(({ root, config }) => {
-  console.log('Instance root id:', root.id, 'config:', config);
-});
-```
-
-### Defensive Fallback
-```ts
-import { ensureConfig } from './config';
-const cfg = ensureConfig() ?? { updateInterval: 60000 };
-```
-
-If you rename the module and prefix, the utilities will still work as long as the root keeps the class `mmm-reactweather-root` or you adjust queries inside `config.ts` accordingly.
-
-## Performance Tips
-
-- Keep rendered component tree small.
-- Offload heavy network / CPU tasks to a future `node_helper.js`.
-- Batch or debounce frequent updates.
-
-## Extending with a Node Helper
-
-Add a `node_helper.js` if you need backend logic (APIs, filesystem, scheduling). Use MagicMirror socket notifications to transfer data to the front-end, then integrate with React state (e.g. via a simple event or global store).
-
-## Troubleshooting
-
-| Issue | Likely Cause | Fix |
-|-------|--------------|-----|
-| Edits not appearing | Not running watch build OR dev=false | Run `yarn dev` and set `dev: true` |
-| Slow reload | Large `updateInterval` | Lower to e.g. 5000 |
-| 404 dist assets | Build not produced | Run `yarn build` or ensure watch finished |
-| Missing styles | CSS not emitted / stale | Delete `dist/` then rebuild |
+---
 
 ## License
 
 MIT
+
+Issues / ideas welcome via the GitHub issue tracker.
