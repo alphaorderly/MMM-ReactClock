@@ -14,7 +14,7 @@ type UseTimeProps = {
 /**
  * A custom hook to manage and provide the current time ( usually own countries' timezone ) and list of other timezones ( usually friends' countries' timezones ).
  *
- * primary tz updates every second, while other timezones update every minute.
+ * primary tz updates every second, while other timezones are calculated from the primary time using offset differences.
  *
  * utilize dayjs
  *
@@ -22,7 +22,12 @@ type UseTimeProps = {
  */
 const useTime = ({ primaryTz, otherTzs }: UseTimeProps) => {
   const [currentTime, setCurrentTime] = useState(dayjs().tz(primaryTz));
-  const [otherTimes, setOtherTimes] = useState(otherTzs.map((tz) => dayjs().tz(tz)));
+  
+  // Calculate other timezone times based on the current time and offset differences
+  const otherTimes = otherTzs.map((tz) => {
+    // Get the current time in the target timezone
+    return currentTime.tz(tz);
+  });
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -31,14 +36,6 @@ const useTime = ({ primaryTz, otherTzs }: UseTimeProps) => {
 
     return () => clearInterval(interval);
   }, [primaryTz]);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setOtherTimes(otherTzs.map((tz) => dayjs().tz(tz)));
-    }, 60000);
-
-    return () => clearInterval(interval);
-  }, [otherTzs]);
 
   return {
     currentTime,

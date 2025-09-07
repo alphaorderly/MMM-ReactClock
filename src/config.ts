@@ -3,11 +3,19 @@
  * Provides typed access to the injected root element and its serialized config.
  */
 
+export enum ClockSize {
+  SM = 'sm',
+  MD = 'md',
+  LG = 'lg',
+  XL = 'xl'
+}
+
 export interface ModuleConfig {
   updateInterval?: number;
   dev?: boolean;
   primary: string;
   others?: string[];
+  size?: ClockSize;
   [key: string]: unknown;
 }
 
@@ -59,4 +67,9 @@ export function ensureConfig(): ModuleConfig | null {
     _cachedConfig = null;
   }
   return _cachedConfig;
+}
+
+export function getClockSize(): ClockSize {
+  const config = ensureConfig();
+  return config?.size || ClockSize.LG;
 }
