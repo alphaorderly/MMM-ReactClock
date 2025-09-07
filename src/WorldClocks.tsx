@@ -101,15 +101,21 @@ const WorldClocks: React.FC<WorldClocksProps> = ({ times, tzNames, primaryTime, 
     return (
         <div className={`${sizeClasses.container} flex flex-col gap-2 w-full`}>
             <div className="divide-y divide-gray-800/60">
-                {times.map((t, i) => (
-                    <WorldClockRow
-                        key={tzNames[i] ?? i}
-                        time={t}
-                        label={tzNames[i] ?? "UNKNOWN"}
-                        primaryTime={primaryTime}
-                        sizeClasses={sizeClasses}
-                    />
-                ))}
+                {times.map((t, i) => {
+                    const originalLabel = tzNames[i] ?? "UNKNOWN";
+                    const processedLabel = originalLabel.includes("/")
+                        ? originalLabel.split("/").filter(Boolean).pop() || originalLabel
+                        : originalLabel;
+                    return (
+                        <WorldClockRow
+                            key={originalLabel || i}
+                            time={t}
+                            label={processedLabel}
+                            primaryTime={primaryTime}
+                            sizeClasses={sizeClasses}
+                        />
+                    );
+                })}
             </div>
         </div>
     );
